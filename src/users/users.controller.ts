@@ -1,4 +1,5 @@
-import { Controller, Get, NotFoundException, Param, Post, Body, Delete, Put } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Body, Delete, Put, ForbiddenException } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 
 interface User {
   id: string;
@@ -26,12 +27,15 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    if (user.id === '1') {
+      throw new ForbiddenException('You are not allowed to access this user');
+    }
     return user;
   }
 
   // Endpoint to create a new user
   @Post()
-  createUser(@Body() body: User) {
+  createUser(@Body() body: CreateUserDto) {
     const newUser = {
       ...body,
       id: `${this.users.length + 1}`, // Generando un ID automatico
@@ -53,7 +57,7 @@ export class UsersController {
 
   // Endpoint to update a user by ID
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() body: Partial<User>) {
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const userIndex = this.users.findIndex((user) => user.id === id);
     if (userIndex === -1) {
       throw new NotFoundException('User not found');
